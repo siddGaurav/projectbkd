@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema<IUser>(
     email: {
       type: String,
       required: true,
+      unique:true
     },
     message: {
       type: String,
