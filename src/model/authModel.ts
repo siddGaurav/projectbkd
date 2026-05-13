@@ -5,6 +5,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   message: string;
+  phone:Number;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -21,6 +22,10 @@ const userSchema = new mongoose.Schema<IUser>(
     },
     message: {
       type: String,
+      required: true,
+    },
+     phone: {
+      type: Number,
       required: true,
     },
   },
