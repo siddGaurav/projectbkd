@@ -169,6 +169,11 @@ export async function serchData(req:Request,res:Response,next:NextFunction) {
 
 
        }catch(err){
+         return res.status(500).json({
+    status: "failed",
+    message: "Server error",
+    error: err
+  });
 
        }
 }
