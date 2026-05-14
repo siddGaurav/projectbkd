@@ -7,7 +7,7 @@ import transporter from "../mail/nodemailer";
 export async function signUp(request:Request,response:Response,next:NextFunction) {
     try{
         const {name,email,message,phone} = request.body;
-        
+        // console.log(name,email)
 
    const user = await User.create({
     name,

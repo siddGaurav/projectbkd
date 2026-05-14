@@ -9,7 +9,8 @@ app.use(
     origin: [
       "https://qubnix.com",
       "https://www.qubnix.com",
-      "http://localhost:3000"
+      "http://localhost:3000",
+      "https://projectown-tm2k.onrender.com"
     ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
