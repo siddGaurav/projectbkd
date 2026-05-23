@@ -4,152 +4,118 @@ import transporter from "../mail/nodemailer";
 
 
 
-export async function signUp(request:Request,response:Response,next:NextFunction) {
-    try{
-        const {name,email,message,phone} = request.body;
-        // console.log(name,email)
 
-   const user = await User.create({
-    name,
-    email,
-    message,
-    phone
-   })
+export async function signUp(req: Request, res: Response) {
 
-if (user) {
-  await transporter.sendMail({
-    from: `"Qubnix" <${process.env.ZOHOMAIL}>`,
-    to: email,
-    subject: "Thanks for contacting Qubnix",
-    html: `
-  <div style="background:#050816;padding:40px 20px;font-family:Arial,sans-serif;">
-    <div style="
-      max-width:600px;
-      margin:auto;
-      background:linear-gradient(135deg,#0f172a,#111827);
-      border-radius:24px;
-      overflow:hidden;
-      border:1px solid rgba(139,92,246,.25);
-      box-shadow:0 0 40px rgba(139,92,246,.25);
-    ">
+  try {
 
-      <div style="
-        background:linear-gradient(90deg,#7c3aed,#ec4899,#22d3ee);
-        padding:3px;
-      ">
-        <div style="
-          background:#0b1020;
-          padding:36px 32px;
-          text-align:center;
-        ">
-          <h1 style="
-            margin:0;
-            font-size:32px;
-            color:#fff;
-            letter-spacing:.5px;
-          ">
-            Welcome to Qubnix 
-          </h1>
+    const { name, email, message, phone } = req.body;
 
-          <p style="
-            margin:16px 0 0;
-            color:#cbd5e1;
-            font-size:17px;
-            line-height:1.8;
-          ">
-            Hi ${name}, your request has been received successfully.
-          </p>
-        </div>
-      </div>
+    // Validation
+    if (!name || !email || !message || !phone) {
+      return res.status(400).json({
+        status: "failed",
+        message: "All fields are required"
+      });
+    }
 
-      <div style="padding:32px;">
-        <div style="
-          background:rgba(255,255,255,.04);
-          border:1px solid rgba(255,255,255,.08);
-          border-radius:18px;
-          padding:22px;
-          margin-bottom:28px;
-        ">
-          <p style="
-            margin:0 0 10px;
-            color:#a78bfa;
-            font-size:12px;
-            letter-spacing:2px;
-            text-transform:uppercase;
-          ">
-            Your Message
-          </p>
+    // Create User
+    const user = await User.create({
+      name,
+      email,
+      message,
+      phone
+    });
 
-          <p style="
-            margin:0;
-            color:#f8fafc;
-            font-size:16px;
-            line-height:1.8;
-          ">
-            ${message}
-          </p>
-        </div>
+    // Send Mail
+    try {
 
-        <p style="
-          color:#d1d5db;
-          font-size:16px;
-          line-height:1.9;
-          margin:0 0 28px;
-        ">
-          Our team will personally contact you within the next 12 hours.
-          Until then, sit back and let Qubnix create something amazing for you.
-        </p>
+      await transporter.sendMail({
+        from: `"Qubnix" <${process.env.ZOHOMAIL}>`,
+        to: email,
+        subject: "Thanks for contacting Qubnix",
 
-        <div style="text-align:center;">
-          <a href="https://qubnix.com" style="
-            display:inline-block;
-            padding:14px 30px;
-            border-radius:999px;
-            background:linear-gradient(90deg,#7c3aed,#ec4899,#22d3ee);
+        html: `
+        <div style="background:#050816;padding:40px 20px;font-family:Arial,sans-serif;">
+          <div style="
+            max-width:600px;
+            margin:auto;
+            background:#111827;
+            border-radius:20px;
+            padding:30px;
             color:white;
-            text-decoration:none;
-            font-weight:700;
-            font-size:15px;
-            box-shadow:0 0 20px rgba(139,92,246,.35);
           ">
-            Visit Qubnix
-          </a>
+
+            <h1 style="text-align:center;">
+              Welcome to Qubnix
+            </h1>
+
+            <p>
+              Hi ${name},
+            </p>
+
+            <p>
+              Your request has been received successfully.
+            </p>
+
+            <div style="
+              background:#1f2937;
+              padding:20px;
+              border-radius:10px;
+              margin:20px 0;
+            ">
+              <p><b>Your Message:</b></p>
+              <p>${message}</p>
+            </div>
+
+            <p>
+              Our team will contact you within 12 hours.
+            </p>
+
+            <div style="text-align:center;margin-top:30px;">
+              <a 
+                href="https://qubnix.com"
+                style="
+                  background:#7c3aed;
+                  color:white;
+                  padding:12px 24px;
+                  border-radius:50px;
+                  text-decoration:none;
+                "
+              >
+                Visit Qubnix
+              </a>
+            </div>
+
+          </div>
         </div>
+        `
+      });
 
-        <p style="
-          margin:36px 0 0;
-          text-align:center;
-          color:#94a3b8;
-          font-size:14px;
-        ">
-          — Team Qubnix
-        </p>
-      </div>
-    </div>
-  </div>
-`,
-  });
+    } catch (mailError) {
 
-  return response.status(200).json({
-    status: "success",
-    message: "Within 12 hours, our team at Qubnix will contact you.",
-    data: name,
-  });
-}else{
-    response.status(400).json({
-        status:"failed",
-        message:"Pleace submit the all requird feilds",
+      console.log("Mail Error:", mailError);
 
-    })
-   }
+    }
 
-    }catch(err){
-        response.status(500).json({
-        status:"failed",
-        message:"Server Error inSignup",err,
+    // Final Response
+    return res.status(200).json({
+      status: "success",
+      message: "Within 12 hours, our team at Qubnix will contact you.",
+      data: user
+    });
 
-    })
-    }   
+  } catch (err) {
+
+    console.log(err);
+
+    return res.status(500).json({
+      status: "failed",
+      message: "Server Error in Signup",
+      error: err
+    });
+
+  }
 }
 
 
